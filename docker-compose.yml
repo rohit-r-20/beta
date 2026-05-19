@@ -1,0 +1,65 @@
+# ============================================================
+# BETA Booking — Docker Compose (Development)
+# ============================================================
+
+version: '3.9'
+
+services:
+  # Redis
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend-api
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend-api/.env
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend-api/src:/app/src
+    command: npm run dev
+
+  # Frontend User
+  frontend-user:
+    build:
+      context: ./frontend-user
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./frontend-user/.env
+    volumes:
+      - ./frontend-user/src:/app/src
+    command: npm run dev
+
+  # Frontend Admin
+  frontend-admin:
+    build:
+      context: ./frontend-admin
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    env_file:
+      - ./frontend-admin/.env
+    volumes:
+      - ./frontend-admin/src:/app/src
+    command: npm run dev
+
+volumes:
+  redis_data:

@@ -1,0 +1,42 @@
+{
+  "name": "beta-booking",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BETA Universal Booking Platform - Production-grade SaaS booking ecosystem",
+  "workspaces": [
+    "shared",
+    "backend-api",
+    "frontend-user",
+    "frontend-admin"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=backend-api",
+    "dev:user": "npm run dev --workspace=frontend-user -- -p 3000",
+    "dev:admin": "npm run dev --workspace=frontend-admin -- -p 3001",
+    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:user\" \"npm run dev:admin\"",
+    "build:shared": "npm run build --workspace=shared",
+    "build:backend": "npm run build --workspace=backend-api",
+    "build:user": "npm run build --workspace=frontend-user",
+    "build:admin": "npm run build --workspace=frontend-admin",
+    "build:all": "npm run build:shared && concurrently \"npm run build:backend\" \"npm run build:user\" \"npm run build:admin\"",
+    "db:generate": "cd backend-api && npx prisma generate",
+    "db:migrate": "cd backend-api && npx prisma migrate dev",
+    "db:push": "cd backend-api && npx prisma db push",
+    "db:seed": "cd backend-api && npx prisma db seed",
+    "lint": "concurrently \"npm run lint --workspace=backend-api\" \"npm run lint --workspace=frontend-user\" \"npm run lint --workspace=frontend-admin\"",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:build": "docker compose build",
+    "clean": "rm -rf node_modules */node_modules */dist */.next"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

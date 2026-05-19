@@ -1,0 +1,76 @@
+# ============================================================
+# BETA Booking — CI/CD Pipeline
+# ============================================================
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci --workspaces --include-workspace-root
+      - run: npm run build:shared
+      - run: cd backend-api && npx prisma generate
+      - name: Lint
+        run: npm run lint --if-present
+        continue-on-error: true
+
+  build-backend:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: cd backend-api && npm ci
+      - run: cd backend-api && npx prisma generate
+      - run: cd backend-api && npm run build
+
+  build-frontend-user:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: cd frontend-user && npm ci
+      - run: cd frontend-user && npm run build
+
+  build-frontend-admin:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: cd frontend-admin && npm ci
+      - run: cd frontend-admin && npm run build
+
+  docker-build:
+    needs: [build-backend, build-frontend-user, build-frontend-admin]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker images
+        run: docker compose build
