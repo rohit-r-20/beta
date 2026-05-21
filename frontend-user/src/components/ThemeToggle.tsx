@@ -27,14 +27,16 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-white cursor-pointer flex items-center justify-center"
+      className="relative p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-strong)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer flex items-center justify-center overflow-hidden group"
       aria-label="Toggle Theme"
     >
-      {theme === 'dark' ? (
-        <Sun size={18} className="text-amber-400" />
-      ) : (
-        <Moon size={18} className="text-indigo-400" />
-      )}
+      <div className="relative w-[18px] h-[18px]">
+        {theme === 'dark' ? (
+          <Sun size={18} className="text-amber-400 group-hover:rotate-45 transition-transform duration-300" />
+        ) : (
+          <Moon size={18} className="text-indigo-500 group-hover:-rotate-12 transition-transform duration-300" />
+        )}
+      </div>
     </button>
   );
 }
